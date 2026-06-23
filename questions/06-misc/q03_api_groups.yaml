@@ -1,0 +1,33 @@
+id: "06-03"
+domain: Miscellaneous
+weight: 8
+difficulty: medium
+title: "列出所有 API groups 並查詢 named group"
+prompt: |
+  1. 啟動 kubectl proxy（port 8001）
+  2. 列出所有可用 API groups（/api 與 /apis）
+  3. 列出 named group（/apis）下的所有 API 名稱
+
+tips: |
+  kubectl proxy &
+  curl http://localhost:8001 | more
+  curl http://localhost:8001/apis | grep "name"
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "api-versions"]
+    expected_output: "apps/v1"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 06-ckad-miscellaneous.md
+    section: "06-03"
+
+tags:
+  - api-groups
+  - kubectl
+  - proxy

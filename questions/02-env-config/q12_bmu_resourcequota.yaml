@@ -1,0 +1,41 @@
+id: "02-12"
+domain: Application Environment, Configuration and Security
+weight: 12
+difficulty: medium
+title: "[bmuschko] ResourceQuota：超過配額的 Pod 建立失敗"
+prompt: |
+  1. 建立 namespace: rq-demo
+  2. 建立 ResourceQuota app（pods: 2，requests.cpu: 2，requests.memory: 500Mi）
+  3. 建立超過配額的 Pod（memory: 1Gi），記錄錯誤訊息
+  4. 改為符合配額的 Pod（memory < 500Mi），成功建立
+  5. 查看 namespace 的資源使用量
+
+tips: |
+  kubectl create namespace rq-demo
+  # ResourceQuota YAML
+  kubectl describe resourcequota app -n rq-demo
+  # 超額 Pod 會回傳: "exceeded quota" 錯誤
+  kubectl describe resourcequota -n rq-demo  # 查看使用量
+
+setup:
+  - "kubectl create namespace rq-demo --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: rq-demo
+  - type: kubectl_output
+    command: ["kubectl", "get", "resourcequota", "app", "-n", "rq-demo", "-o", "name"]
+    expected_output: "resourcequota/app"
+
+cleanup:
+  - "kubectl delete namespace rq-demo --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/24-resourcequota/instructions.md
+    section: "Exercise 24"
+
+tags:
+  - resourcequota
+  - resources
+  - namespace

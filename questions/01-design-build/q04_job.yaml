@@ -1,0 +1,41 @@
+id: "01-04"
+domain: Application Design and Build
+weight: 10
+difficulty: medium
+title: "建立 Job 執行一次性任務"
+prompt: |
+  1. 建立 namespace: job-namespace
+  2. 建立 Job，名稱 my-job
+     - image: busybox
+     - command: ["sh", "-c", "echo Hello CKAD && sleep 5"]
+     - completions: 3（執行 3 次）
+     - parallelism: 2（同時最多 2 個 Pod）
+  3. 等待 Job 完成（STATUS=Complete）
+
+tips: |
+  kubectl create job my-job --image=busybox -n job-namespace \
+    -- sh -c "echo Hello CKAD && sleep 5"
+  # completions 與 parallelism 需在 YAML 中設定
+  kubectl wait --for=condition=complete job/my-job -n job-namespace --timeout=120s
+
+setup:
+  - "kubectl create namespace job-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: job-namespace
+  - type: job_exists
+    name: my-job
+    namespace: job-namespace
+  - type: job_completed
+    name: my-job
+    namespace: job-namespace
+
+cleanup:
+  - "kubectl delete namespace job-namespace --force --grace-period=0"
+
+tags:
+  - job
+  - batch
+  - completions
+  - parallelism

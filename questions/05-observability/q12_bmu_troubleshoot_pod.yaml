@@ -1,0 +1,39 @@
+id: "05-12"
+domain: Observability and Maintenance
+weight: 12
+difficulty: medium
+title: "[bmuschko] Troubleshoot：找出並修復 Pod 設定問題"
+prompt: |
+  1. 從 pod.yaml 建立 Pod（bmuschko exercises/20-troubleshooting-pod/）
+  2. 查看 Pod 狀態，是否有問題？
+  3. 查看 container logs，找出錯誤
+  4. exec 進入 container，驗證問題
+  5. 提出修復方案
+
+tips: |
+  kubectl apply -f pod.yaml
+  kubectl get pod
+  kubectl describe pod <pod-name>
+  kubectl logs <pod-name>
+  kubectl exec -it <pod-name> -- sh
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "get", "pods", "-o", "wide"]
+    expected_output: "Running"
+
+cleanup:
+  - "kubectl delete pod --all --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/20-troubleshooting-pod/instructions.md
+    section: "Exercise 20"
+
+tags:
+  - troubleshooting
+  - pod
+  - debugging
+  - logs

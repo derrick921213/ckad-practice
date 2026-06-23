@@ -1,0 +1,43 @@
+id: "01-10"
+domain: Application Design and Build
+weight: 10
+difficulty: medium
+title: "[bmuschko] 建立 Pod 並掛載 emptyDir 到 nginx 需要的路徑"
+prompt: |
+  1. 建立 namespace: h92
+  2. 在 h92 建立 Pod nginx，image: nginx:1.21.6
+  3. 定義 3 個 emptyDir volumes：
+     - nginx-run → /var/run
+     - nginx-cache → /var/cache/nginx
+     - nginx-data → /usr/local/nginx
+  4. (選做) 如何防止 nginx 寫入非 Volume 掛載路徑？（readOnlyRootFilesystem: true）
+
+tips: |
+  kubectl create namespace h92
+  # 在 Pod YAML 定義 volumes 與 volumeMounts
+
+setup:
+  - "kubectl create namespace h92 --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: h92
+  - type: pod_exists
+    name: nginx
+    namespace: h92
+  - type: pod_running
+    name: nginx
+    namespace: h92
+
+cleanup:
+  - "kubectl delete namespace h92 --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/05-ephemeral-volume/instructions.md
+    section: "Exercise 5"
+
+tags:
+  - emptydir
+  - volume
+  - nginx

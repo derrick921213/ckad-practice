@@ -1,0 +1,67 @@
+id: "05-08"
+domain: Observability and Maintenance
+weight: 8
+difficulty: easy
+title: "更改 Deployment 環境變數 TIER=web 為 TIER=app"
+prompt: |
+  準備步驟（已自動執行）：
+  - 建立 set-env-namespace 及 nginx-deployment（含 env TIER=web）
+
+  你的任務：
+  1. 確認目前 env 設定
+  2. 使用 kubectl set env 將 TIER=web 改為 TIER=app
+  3. 驗證更改成功
+
+tips: |
+  kubectl describe deployment nginx-deployment -n set-env-namespace | grep -i env -A1
+  kubectl set env deployment nginx-deployment TIER=app -n set-env-namespace
+  kubectl describe deployment nginx-deployment -n set-env-namespace | grep -i env -A1
+
+setup:
+  - "kubectl create namespace set-env-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - |
+    kubectl apply -f - <<EOF
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: nginx-deployment
+      namespace: set-env-namespace
+      labels:
+        app: nginx
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.14.2
+            ports:
+            - containerPort: 80
+            env:
+            - name: TIER
+              value: web
+    EOF
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "set", "env", "deployment/nginx-deployment", "-n", "set-env-namespace", "--list"]
+    expected_output: "TIER=app"
+
+cleanup:
+  - "kubectl delete namespace set-env-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-07"
+
+tags:
+  - environment-variables
+  - deployment
+  - kubectl

@@ -1,0 +1,36 @@
+id: "01-09"
+domain: Application Design and Build
+weight: 8
+difficulty: easy
+title: "[bmuschko] 建立 CronJob 每分鐘輸出當前日期"
+prompt: |
+  1. 建立 CronJob current-date，每分鐘執行：echo "Current date: $(date)"
+     - image: nginx:1.21.6
+  2. 觀察 jobs 被排程執行的過程
+  3. 找出某個執行過 CronJob 的 Pod，查看其 logs
+  4. 確認 CronJob 保留成功執行歷史的數量
+  5. 刪除 CronJob
+
+tips: |
+  kubectl create cronjob current-date --image=nginx:1.21.6 --schedule="*/1 * * * *" -- sh -c 'echo "Current date: $(date)"'
+  kubectl get jobs --watch
+  kubectl logs <pod-name>
+  kubectl get cronjob current-date -o yaml | grep successfulJobsHistoryLimit
+
+setup: []
+
+verify:
+  - type: cronjob_exists
+    name: current-date
+
+cleanup:
+  - "kubectl delete cronjob current-date --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/04-cronjob/instructions.md
+    section: "Exercise 4"
+
+tags:
+  - cronjob
+  - scheduling

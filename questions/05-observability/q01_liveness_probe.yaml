@@ -1,0 +1,45 @@
+id: "05-01"
+domain: Observability and Maintenance
+weight: 10
+difficulty: medium
+title: "設定 Liveness 與 Readiness Probe"
+prompt: |
+  1. 建立 namespace: probe-namespace
+  2. 建立 Pod，名稱 probe-pod，image: nginx
+  3. 設定 livenessProbe：
+     - httpGet path: /，port: 80
+     - initialDelaySeconds: 5，periodSeconds: 10
+  4. 設定 readinessProbe：
+     - httpGet path: /，port: 80
+     - initialDelaySeconds: 3，periodSeconds: 5
+  5. Pod 應成功運行（Running + Ready）
+
+tips: |
+  kubectl run probe-pod --image=nginx --dry-run=client -o yaml > probe.yaml
+  # 手動加入 livenessProbe 和 readinessProbe 到 containers[0]
+  kubectl apply -f probe.yaml
+
+setup:
+  - "kubectl create namespace probe-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: probe-namespace
+  - type: pod_exists
+    name: probe-pod
+    namespace: probe-namespace
+  - type: pod_running
+    name: probe-pod
+    namespace: probe-namespace
+  - type: kubectl_output
+    command: ["kubectl", "get", "pod", "probe-pod", "-n", "probe-namespace", "-o", "jsonpath={.spec.containers[0].livenessProbe.httpGet.path}"]
+    expected_output: "/"
+
+cleanup:
+  - "kubectl delete namespace probe-namespace --force --grace-period=0"
+
+tags:
+  - probe
+  - liveness
+  - readiness
+  - observability

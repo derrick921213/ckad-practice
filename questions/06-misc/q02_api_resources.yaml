@@ -1,0 +1,30 @@
+id: "06-02"
+domain: Miscellaneous
+weight: 5
+difficulty: easy
+title: "列出 namespace 內所有可用 Kubernetes 資源（只顯示名稱）"
+prompt: |
+  1. 列出所有可在 namespace 中使用的 Kubernetes 資源
+  2. 只顯示資源名稱（不含其他欄位）
+
+tips: |
+  kubectl api-resources --namespaced=true -o name
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "api-resources", "--namespaced=true", "-o", "name"]
+    expected_output: "configmaps"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 06-ckad-miscellaneous.md
+    section: "06-02"
+
+tags:
+  - api-resources
+  - kubectl
+  - namespace

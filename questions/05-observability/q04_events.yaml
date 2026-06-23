@@ -1,0 +1,29 @@
+id: "05-04"
+domain: Observability and Maintenance
+weight: 5
+difficulty: easy
+title: "依建立時間排序列出所有 namespace 的 events"
+prompt: |
+  1. 輸出所有 namespace 的 events，依 creationTimestamp 排序
+
+tips: |
+  kubectl get events -A --sort-by=.metadata.creationTimestamp
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "get", "events", "-A", "--sort-by=.metadata.creationTimestamp"]
+    expected_output: "NAMESPACE"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-03"
+
+tags:
+  - events
+  - observability
+  - debugging

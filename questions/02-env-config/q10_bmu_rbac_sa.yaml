@@ -1,0 +1,43 @@
+id: "02-10"
+domain: Application Environment, Configuration and Security
+weight: 15
+difficulty: hard
+title: "[bmuschko] RBAC：ServiceAccount 授予 list services 權限"
+prompt: |
+  1. 建立 namespace: t23
+  2. 建立 Pod service-list（image: alpine/curl:3.14）在 t23：
+     - 無限迴圈 curl Kubernetes API 列出 default namespace 的 services
+  3. 建立並綁定 ServiceAccount api-call 到 Pod
+  4. 查看 container logs，預期看到什麼回應？（403 Forbidden）
+  5. 建立 ClusterRole + RoleBinding，授予 list services 權限
+  6. 再次查看 logs，確認 curl 回傳成功
+
+tips: |
+  kubectl create namespace t23
+  kubectl create sa api-call -n t23
+  # Pod 使用 serviceAccountName: api-call
+  kubectl create clusterrole service-reader --verb=list --resource=services
+  kubectl create rolebinding service-reader-rb --clusterrole=service-reader --serviceaccount=t23:api-call -n default
+
+setup:
+  - "kubectl create namespace t23 --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: t23
+
+cleanup:
+  - "kubectl delete namespace t23 --force --grace-period=0"
+  - "kubectl delete clusterrole service-reader --ignore-not-found"
+  - "kubectl delete rolebinding service-reader-rb -n default --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/22-rbac-serviceaccount/instructions.md
+    section: "Exercise 22"
+
+tags:
+  - rbac
+  - serviceaccount
+  - clusterrole
+  - rolebinding

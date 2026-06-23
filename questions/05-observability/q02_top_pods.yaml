@@ -1,0 +1,33 @@
+id: "05-02"
+domain: Observability and Maintenance
+weight: 8
+difficulty: easy
+title: "依 CPU/Memory 排序列出所有 Pod"
+prompt: |
+  1. 列出 cluster 中所有 Pod，依 CPU 消耗排序
+  2. 列出 cluster 中所有 Pod，依 Memory 消耗排序
+
+  注意：需安裝 metrics-server 才可使用 kubectl top
+
+tips: |
+  kubectl top pods -A --sort-by=cpu
+  kubectl top pods -A --sort-by=memory
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "top", "pods", "-A", "--sort-by=cpu"]
+    expected_output: "CPU"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-01"
+
+tags:
+  - metrics
+  - top
+  - observability

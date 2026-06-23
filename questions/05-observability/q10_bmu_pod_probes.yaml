@@ -1,0 +1,43 @@
+id: "05-10"
+domain: Observability and Maintenance
+weight: 12
+difficulty: medium
+title: "[bmuschko] 設定 Readiness 與 Liveness Probe（HTTP GET）"
+prompt: |
+  1. 建立 Pod hello，image: bmuschko/nodejs-hello-world:1.0.0，expose port 3000
+     - container port 命名為 nodejs-port
+  2. 加入 Readiness Probe：
+     - httpGet path: /，port: nodejs-port
+     - initialDelaySeconds: 2
+  3. 加入 Liveness Probe：
+     - httpGet path: /，port: nodejs-port
+     - initialDelaySeconds: 5，periodSeconds: 8
+  4. exec 進入 container 執行 curl localhost:3000，記錄輸出
+  5. 取得 container logs
+
+tips: |
+  # Pod YAML 中定義 readinessProbe 與 livenessProbe
+  kubectl exec -it hello -- curl localhost:3000
+  kubectl logs hello
+
+setup: []
+
+verify:
+  - type: pod_exists
+    name: hello
+  - type: pod_running
+    name: hello
+
+cleanup:
+  - "kubectl delete pod hello --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/18-pod-probes/instructions.md
+    section: "Exercise 18"
+
+tags:
+  - liveness-probe
+  - readiness-probe
+  - health-check
+  - nodejs

@@ -1,0 +1,36 @@
+id: "01-01"
+domain: Application Design and Build
+weight: 10
+difficulty: easy
+title: "建立並運行 Docker Container"
+prompt: |
+  1. 建立一個 index.html，內容為: "Hardships often prepare ordinary people for an extraordinary destiny."
+  2. 建立一個 Dockerfile，使用 nginx:latest，將 index.html 複製到 /usr/share/nginx/html/index.html
+  3. 建置 image，命名為 my-image:v0.1
+  4. 啟動 container，名稱為 my-container，host port 8080 對應 container port 80
+  5. 驗證: curl localhost:8080 應回傳 index.html 內容
+  6. 停止並刪除 container
+
+tips: |
+  docker build -t my-image:v0.1 .
+  docker run -d -p 8080:80 --name my-container my-image:v0.1
+  docker container stop my-container && docker container rm my-container
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"]
+    expected_output: "my-image:v0.1"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 01-ckad-design-build.md
+    section: "01-01"
+
+tags:
+  - docker
+  - container
+  - image

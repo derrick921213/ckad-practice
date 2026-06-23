@@ -1,0 +1,51 @@
+id: "02-07"
+domain: Application Environment, Configuration and Security
+weight: 15
+difficulty: hard
+title: "修復 RBAC 權限：新增 delete 動作"
+prompt: |
+  情境：出現錯誤 "User rbac-sa cannot delete resource pods"，需要修復。
+
+  準備步驟（已自動執行）：
+  - 建立 namespace rbac-namespace
+  - 建立 ServiceAccount rbac-sa
+  - 建立 Role rbac-role（verb: get, watch）
+  - 建立 RoleBinding
+
+  你的任務：
+  1. 查看 rbac-role 的當前權限
+  2. 編輯 rbac-role，加入 delete verb
+  3. 驗證：kubectl auth can-i delete pods --as=system:serviceaccount:rbac-namespace:rbac-sa
+
+tips: |
+  kubectl get role rbac-role -n rbac-namespace
+  kubectl describe role rbac-role -n rbac-namespace
+  kubectl edit role rbac-role -n rbac-namespace
+  # 在 verbs 陣列中加入 delete
+  kubectl auth can-i delete pods --as=system:serviceaccount:rbac-namespace:rbac-sa -n rbac-namespace
+
+setup:
+  - "kubectl create namespace rbac-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create sa rbac-sa -n rbac-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create deployment rbac-deployment --image=nginx --replicas=3 -n rbac-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create role rbac-role --verb=get,watch --resource=pods,pods/status -n rbac-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create rolebinding rbac-rolebinding --role=rbac-role --serviceaccount=rbac-namespace:rbac-sa -n rbac-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "auth", "can-i", "delete", "pods", "--as=system:serviceaccount:rbac-namespace:rbac-sa", "-n", "rbac-namespace"]
+    expected_output: "yes"
+
+cleanup:
+  - "kubectl delete namespace rbac-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 02-ckad-env-configuration-security.md
+    section: "02-05"
+
+tags:
+  - rbac
+  - role
+  - rolebinding
+  - serviceaccount

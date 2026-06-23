@@ -1,0 +1,51 @@
+id: "03-01"
+domain: Application Deployment
+weight: 15
+difficulty: medium
+title: "建立 Deployment 含資源限制"
+prompt: |
+  1. 建立 namespace: deployment-namespace
+  2. 建立 Deployment，名稱 my-deployment，3 個 replicas
+     - image: nginx，container port: 80
+     - container 命名為 my-container
+     - memory request: 25Mi，memory limit: 100Mi
+
+tips: |
+  kubectl create deployment my-deployment --image=nginx --replicas=3 --port=80 --dry-run=client -o yaml > dep.yaml
+  # 修改 containers[0].name 與 resources
+
+setup:
+  - "kubectl create namespace deployment-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: deployment-namespace
+  - type: deployment_exists
+    name: my-deployment
+    namespace: deployment-namespace
+  - type: deployment_replicas
+    name: my-deployment
+    namespace: deployment-namespace
+    replicas: 3
+  - type: deployment_image
+    name: my-deployment
+    namespace: deployment-namespace
+    image: nginx
+  - type: container_resources
+    name: my-deployment
+    namespace: deployment-namespace
+    memory_request: "25Mi"
+    memory_limit: "100Mi"
+
+cleanup:
+  - "kubectl delete namespace deployment-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 03-ckad-deployment.md
+    section: "03-01"
+
+tags:
+  - deployment
+  - resources
+  - replicas

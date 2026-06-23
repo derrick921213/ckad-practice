@@ -1,0 +1,49 @@
+id: "04-07"
+domain: Services and Networking
+weight: 12
+difficulty: medium
+title: "[bmuschko] 建立 Ingress 路由 / 到 web Service"
+prompt: |
+  1. 確認 Ingress Controller 正在運行
+  2. 建立 Deployment web，1 replica，image: bmuschko/nodejs-hello-world:1.0.0，port 3000
+  3. 建立 ClusterIP Service web，路由到 Deployment web
+  4. curl Service endpoint / → 應顯示 "Hello World"
+  5. 建立 Ingress：
+     - host: hello-world.exposed
+     - path: /
+     - 路由到 Service web
+  6. 列出 Ingress 物件
+  7. 在 /etc/hosts 加入 virtual node IP → hello-world.exposed
+  8. curl http://hello-world.exposed → 顯示 "Hello World"
+
+tips: |
+  kubectl create deployment web --image=bmuschko/nodejs-hello-world:1.0.0 --port=3000
+  kubectl expose deployment web --port=3000 --name=web --type=ClusterIP
+  # Ingress YAML with host: hello-world.exposed
+  echo "<node-ip> hello-world.exposed" >> /etc/hosts
+  curl http://hello-world.exposed
+
+setup: []
+
+verify:
+  - type: deployment_exists
+    name: web
+  - type: service_exists
+    name: web
+  - type: ingress_exists
+    name: web-ingress
+
+cleanup:
+  - "kubectl delete deployment web --ignore-not-found"
+  - "kubectl delete service web --ignore-not-found"
+  - "kubectl delete ingress web-ingress --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/31-ingress/instructions.md
+    section: "Exercise 31"
+
+tags:
+  - ingress
+  - networking
+  - nodejs

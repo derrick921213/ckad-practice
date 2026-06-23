@@ -1,0 +1,51 @@
+id: "02-01"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: easy
+title: "建立 ConfigMap 並注入 Pod 環境變數"
+prompt: |
+  1. 建立 namespace: config-namespace
+  2. 建立 ConfigMap，名稱 my-config，包含：
+     - key: APP_COLOR，value: blue
+     - key: APP_MODE，value: production
+  3. 建立 Pod，名稱 config-pod，image: nginx
+     - 透過 envFrom 將整個 ConfigMap 注入為環境變數
+  4. 驗證: kubectl exec config-pod -n config-namespace -- env | grep APP_COLOR
+
+tips: |
+  kubectl create configmap my-config --from-literal=APP_COLOR=blue --from-literal=APP_MODE=production -n config-namespace
+  # Pod spec 加入 envFrom: - configMapRef: name: my-config
+
+setup:
+  - "kubectl create namespace config-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: config-namespace
+  - type: configmap_exists
+    name: my-config
+    namespace: config-namespace
+  - type: configmap_key
+    name: my-config
+    namespace: config-namespace
+    key: APP_COLOR
+    value: blue
+  - type: configmap_key
+    name: my-config
+    namespace: config-namespace
+    key: APP_MODE
+    value: production
+  - type: pod_exists
+    name: config-pod
+    namespace: config-namespace
+  - type: pod_running
+    name: config-pod
+    namespace: config-namespace
+
+cleanup:
+  - "kubectl delete namespace config-namespace --force --grace-period=0"
+
+tags:
+  - configmap
+  - env
+  - configuration

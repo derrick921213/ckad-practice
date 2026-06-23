@@ -1,0 +1,36 @@
+id: "05-05"
+domain: Observability and Maintenance
+weight: 8
+difficulty: medium
+title: "使用 JSONPath 取得 Pod 的 hostIP"
+prompt: |
+  1. 建立 namespace: json-namespace
+  2. 建立 Pod json-pod，image: nginx
+  3. 使用 JSONPath 取得 json-pod 的 hostIP
+
+tips: |
+  kubectl create namespace json-namespace
+  kubectl run json-pod --image=nginx -n json-namespace
+  kubectl get pod json-pod -n json-namespace -o jsonpath={.status.hostIP}
+
+setup:
+  - "kubectl create namespace json-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl run json-pod --image=nginx -n json-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: pod_running
+    name: json-pod
+    namespace: json-namespace
+
+cleanup:
+  - "kubectl delete namespace json-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-04"
+
+tags:
+  - jsonpath
+  - observability
+  - kubectl

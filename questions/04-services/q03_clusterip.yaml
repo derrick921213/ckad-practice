@@ -1,0 +1,52 @@
+id: "04-03"
+domain: Services and Networking
+weight: 10
+difficulty: easy
+title: "建立 ClusterIP Service 對 Pod 提供 cluster 內部存取"
+prompt: |
+  1. 建立 namespace: service-namespace
+  2. 建立 Pod service-pod，image: nginx，port: 80，label: tier=web
+  3. 建立 ClusterIP Service，名稱 my-service：
+     - port: 8080 → target-port: 80
+  4. 驗證 endpoints 正確指向 pod
+
+tips: |
+  kubectl create namespace service-namespace
+  kubectl run service-pod --image=nginx --port=80 --labels=tier=web -n service-namespace
+  kubectl expose pod service-pod --port=8080 --target-port=80 --name=my-service -n service-namespace
+  kubectl get ep -n service-namespace
+
+setup:
+  - "kubectl create namespace service-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: service-namespace
+  - type: pod_running
+    name: service-pod
+    namespace: service-namespace
+  - type: service_exists
+    name: my-service
+    namespace: service-namespace
+  - type: service_type
+    name: my-service
+    namespace: service-namespace
+    service_type: ClusterIP
+  - type: service_port
+    name: my-service
+    namespace: service-namespace
+    port: 8080
+    target_port: 80
+
+cleanup:
+  - "kubectl delete namespace service-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 04-ckad-services-networking.md
+    section: "04-02"
+
+tags:
+  - service
+  - clusterip
+  - networking

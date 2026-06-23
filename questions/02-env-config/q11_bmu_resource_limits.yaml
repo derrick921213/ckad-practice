@@ -1,0 +1,43 @@
+id: "02-11"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: medium
+title: "[bmuschko] 設定 Pod CPU/Memory/Ephemeral storage 資源限制"
+prompt: |
+  1. 建立 Pod hello-world，image: bmuschko/nodejs-hello-world:1.0.0，expose port 3000
+  2. 加入 emptyDir volume，掛載到 /var/log
+  3. 設定資源 requests（最小需求）：
+     - CPU: 100m
+     - Memory: 500Mi
+     - Ephemeral storage: 1Gi
+  4. 設定資源 limits（最大上限）：
+     - Memory: 500Mi
+     - Ephemeral storage: 2Gi
+  5. 建立 Pod，查看執行在哪個 node
+
+tips: |
+  # Pod YAML 中 resources.requests 與 resources.limits
+  kubectl apply -f pod.yaml
+  kubectl get pod hello-world -o wide
+
+setup: []
+
+verify:
+  - type: pod_exists
+    name: hello-world
+  - type: pod_running
+    name: hello-world
+
+cleanup:
+  - "kubectl delete pod hello-world --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/23-resource-requests-limits/instructions.md
+    section: "Exercise 23"
+
+tags:
+  - resources
+  - requests
+  - limits
+  - ephemeral-storage

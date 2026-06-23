@@ -1,0 +1,37 @@
+id: "04-06"
+domain: Services and Networking
+weight: 12
+difficulty: hard
+title: "[bmuschko] Troubleshoot：Service 無法連接，找出並修復問題"
+prompt: |
+  1. 從 setup.yaml 建立物件（namespace y72）
+  2. 查看 y72 中的物件
+  3. 執行臨時 Pod（busybox:1.36.1），wget web-app Service → 連接失敗
+  4. 找出連接問題的根本原因並修復
+  5. 重新執行 wget，確認成功
+
+tips: |
+  kubectl get all -n y72
+  kubectl describe service web-app -n y72
+  kubectl get endpoints web-app -n y72
+  # 常見問題：Service selector 與 Pod labels 不匹配、port 錯誤
+
+setup: []
+
+verify:
+  - type: namespace_exists
+    name: y72
+
+cleanup:
+  - "kubectl delete namespace y72 --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/30-troubleshooting-service/instructions.md
+    section: "Exercise 30"
+
+tags:
+  - troubleshooting
+  - service
+  - networking
+  - debugging

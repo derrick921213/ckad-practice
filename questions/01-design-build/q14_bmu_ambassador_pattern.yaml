@@ -1,0 +1,44 @@
+id: "01-14"
+domain: Application Design and Build
+weight: 12
+difficulty: hard
+title: "[bmuschko] Ambassador Pattern：rate-limiting proxy"
+prompt: |
+  1. 建立 namespace: ext-access
+  2. 建立 Pod rate-limiter，定義兩個 containers：
+     - business-app：image bmuschko/nodejs-business-app:1.0.0，expose port 8080
+     - ambassador：image bmuschko/nodejs-ambassador:1.0.0，expose port 8081
+  3. 建立 Pod
+  4. exec 進入 business-app container
+  5. 對 localhost:8081/test 執行多次 curl
+     - 前 5 次允許
+     - 第 6 次回傳 rate limit error
+
+tips: |
+  kubectl create namespace ext-access
+  kubectl apply -f rate-limiter.yaml
+  kubectl exec -it rate-limiter -c business-app -n ext-access -- sh
+  for i in 1 2 3 4 5 6; do curl localhost:8081/test; done
+
+setup:
+  - "kubectl create namespace ext-access --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: ext-access
+  - type: pod_exists
+    name: rate-limiter
+    namespace: ext-access
+
+cleanup:
+  - "kubectl delete namespace ext-access --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/09-ambassador-pattern/instructions.md
+    section: "Exercise 9"
+
+tags:
+  - ambassador-pattern
+  - multi-container
+  - rate-limiting

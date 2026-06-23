@@ -1,0 +1,51 @@
+id: "01-03"
+domain: Application Design and Build
+weight: 15
+difficulty: medium
+title: "建立 PV、PVC 並掛載到 Pod"
+prompt: |
+  1. 建立 namespace: storage-namespace
+  2. 建立 PersistentVolume，名稱 my-pv，容量 5Gi，hostPath /mnt/my-host
+  3. 建立 PersistentVolumeClaim，名稱 my-pvc，請求 2Gi，確保 STATUS=Bound
+  4. 建立 Pod，名稱 storage-pod，image nginx
+  5. 將 my-pvc 掛載到 Pod 的 /my-mount 路徑
+
+tips: |
+  PV 的 storageClassName 必須與 PVC 一致（例如都用 "manual"）
+  accessModes: ReadWriteOnce
+
+setup:
+  - "kubectl create namespace storage-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: storage-namespace
+  - type: pv_exists
+    name: my-pv
+  - type: pvc_exists
+    name: my-pvc
+    namespace: storage-namespace
+  - type: pvc_bound
+    name: my-pvc
+    namespace: storage-namespace
+  - type: pod_exists
+    name: storage-pod
+    namespace: storage-namespace
+  - type: pod_running
+    name: storage-pod
+    namespace: storage-namespace
+
+cleanup:
+  - "kubectl delete namespace storage-namespace --force --grace-period=0"
+  - "kubectl delete pv my-pv --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 01-ckad-design-build.md
+    section: "01-03"
+
+tags:
+  - storage
+  - pv
+  - pvc
+  - volume

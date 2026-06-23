@@ -1,0 +1,39 @@
+id: "01-08"
+domain: Application Design and Build
+weight: 10
+difficulty: medium
+title: "[bmuschko] 建立 Parallel Job：base64 隨機 hash"
+prompt: |
+  1. 建立 Job random-hash，執行指令：echo $RANDOM | base64 | head -c 20
+     - image: alpine:3.17.3
+     - 同時執行 2 個 Pod（parallelism: 2）
+     - 完成數量：5 個 completions
+  2. 確認哪些 Pod 執行了指令（預計多少個 Pod？）
+  3. 從其中一個 Pod 取得產生的 hash
+  4. 刪除 Job（對應的 Pod 是否會繼續存在？）
+
+tips: |
+  kubectl create job random-hash --image=alpine:3.17.3 -- sh -c "echo $RANDOM | base64 | head -c 20"
+  # 加入 parallelism: 2 和 completions: 5 需用 YAML
+  kubectl get pods -l job-name=random-hash
+  kubectl logs <pod-name>
+  kubectl delete job random-hash
+
+setup: []
+
+verify:
+  - type: job_exists
+    name: random-hash
+
+cleanup:
+  - "kubectl delete job random-hash --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/03-job/instructions.md
+    section: "Exercise 3"
+
+tags:
+  - job
+  - parallel
+  - alpine

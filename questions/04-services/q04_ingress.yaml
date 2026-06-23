@@ -1,0 +1,38 @@
+id: "04-04"
+domain: Services and Networking
+weight: 12
+difficulty: medium
+title: "建立 Ingress 對外暴露 my-service"
+prompt: |
+  前提：service-namespace 中已有 my-service（port 8080）
+  
+  1. 建立 Ingress，名稱 my-ingress，namespace: service-namespace
+  2. 設定 path: /，pathType: Prefix
+  3. 後端 service: my-service，port: 8080
+  4. 驗證：curl localhost 可回傳 nginx 預設頁面
+
+tips: |
+  # 需要先安裝 Ingress Controller
+  # kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
+  # 建立 Ingress YAML（networking.k8s.io/v1）
+
+setup:
+  - "kubectl create namespace service-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: ingress_exists
+    name: my-ingress
+    namespace: service-namespace
+
+cleanup:
+  - "kubectl delete namespace service-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 04-ckad-services-networking.md
+    section: "04-03"
+
+tags:
+  - ingress
+  - networking
+  - service

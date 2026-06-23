@@ -1,0 +1,57 @@
+id: "04-02"
+domain: Services and Networking
+weight: 15
+difficulty: hard
+title: "Network Policy：web-pod 只允許連接 app-pod:80"
+prompt: |
+  1. 建立 namespace: netpol-namespace
+  2. 建立 Pod web-pod，image: nginx，label: tier=web
+  3. 建立 Pod app-pod，image: nginx，label: tier=app
+  4. 建立 Pod db-pod，image: nginx，label: tier=db
+  5. 建立 NetworkPolicy 使：
+     - web-pod 可以連接 app-pod:80
+     - web-pod 不能連接 db-pod
+  6. 套用 default-deny-all policy（ingress+egress）
+  7. 套用 web-policy（egress to tier=app:80）
+  8. 套用 app-policy（ingress from tier=web:80）
+
+tips: |
+  # default-deny-all
+  kubectl create namespace netpol-namespace
+  # 建立 NetworkPolicy 需 YAML
+  # spec.podSelector: {} + policyTypes: [Ingress, Egress] = deny all
+
+setup:
+  - "kubectl create namespace netpol-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl run web-pod --image=nginx --labels=tier=web -n netpol-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl run app-pod --image=nginx --labels=tier=app -n netpol-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl run db-pod --image=nginx --labels=tier=db -n netpol-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: netpol-namespace
+  - type: pod_running
+    name: web-pod
+    namespace: netpol-namespace
+  - type: pod_running
+    name: app-pod
+    namespace: netpol-namespace
+  - type: pod_running
+    name: db-pod
+    namespace: netpol-namespace
+  - type: kubectl_output
+    command: ["kubectl", "get", "networkpolicy", "-n", "netpol-namespace", "-o", "name"]
+    expected_output: "networkpolicy.networking.k8s.io"
+
+cleanup:
+  - "kubectl delete namespace netpol-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 04-ckad-services-networking.md
+    section: "04-01"
+
+tags:
+  - networkpolicy
+  - security
+  - networking

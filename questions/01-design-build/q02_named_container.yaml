@@ -1,0 +1,44 @@
+id: "01-02"
+domain: Application Design and Build
+weight: 10
+difficulty: easy
+title: "建立指定 Container 名稱的 Pod"
+prompt: |
+  1. 建立一個 namespace: pod-namespace
+  2. 在 pod-namespace 中建立一個 Pod，名稱為 pod-1，image 為 nginx
+  3. Pod 中的 container 必須命名為 container-1（注意：預設是 pod 名稱）
+
+tips: |
+  kubectl run pod-1 --image=nginx --dry-run=client -o yaml > pod.yaml
+  # 修改 spec.containers[0].name 為 container-1
+  kubectl apply -f pod.yaml
+
+setup:
+  - "kubectl create namespace pod-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: pod-namespace
+  - type: pod_exists
+    name: pod-1
+    namespace: pod-namespace
+  - type: pod_running
+    name: pod-1
+    namespace: pod-namespace
+  - type: pod_image
+    name: pod-1
+    namespace: pod-namespace
+    image: nginx
+
+cleanup:
+  - "kubectl delete namespace pod-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 01-ckad-design-build.md
+    section: "01-02"
+
+tags:
+  - pod
+  - namespace
+  - container-name

@@ -1,0 +1,48 @@
+id: "03-06"
+domain: Application Deployment
+weight: 12
+difficulty: medium
+title: "[bmuschko] Deployment Rolling Update 與 Rollback"
+prompt: |
+  1. 建立 Deployment nginx，3 replicas，image: nginx:1.23.0
+     - label: tier=backend，pod label: app=v1
+  2. 確認正確 replica 數
+  3. 更新 image 為 nginx:1.23.4
+  4. 驗證 rolling update 已套用到所有 replicas
+  5. 設定 change-cause 為 "Pick up patch version"
+  6. Scale 到 5 replicas
+  7. 查看 rollout 歷史
+  8. 回滾到 revision 1
+  9. 確認 Pod 使用 nginx:1.23.0
+
+tips: |
+  kubectl create deployment nginx --image=nginx:1.23.0 --replicas=3
+  kubectl set image deployment/nginx nginx=nginx:1.23.4
+  kubectl rollout status deployment/nginx
+  kubectl annotate deployment nginx kubernetes.io/change-cause="Pick up patch version"
+  kubectl scale deployment nginx --replicas=5
+  kubectl rollout history deployment/nginx
+  kubectl rollout undo deployment/nginx --to-revision=1
+
+setup: []
+
+verify:
+  - type: deployment_exists
+    name: nginx
+  - type: deployment_replicas
+    name: nginx
+    replicas: 5
+
+cleanup:
+  - "kubectl delete deployment nginx --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/11-deployment-rolling-update/instructions.md
+    section: "Exercise 11"
+
+tags:
+  - deployment
+  - rolling-update
+  - rollback
+  - history

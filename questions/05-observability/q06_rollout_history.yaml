@@ -1,0 +1,47 @@
+id: "05-06"
+domain: Observability and Maintenance
+weight: 12
+difficulty: medium
+title: "檢查 Deployment rollout 歷史並回滾"
+prompt: |
+  準備步驟（已自動執行）：
+  - 建立 revision-namespace
+  - 建立 my-revision-deployment（image: nginx:1.18.0）並執行多次 image 更新，最後一次使用錯誤 image
+
+  你的任務：
+  1. 查看 my-revision-deployment 的 rollout 歷史
+  2. 修復：undo 回最近一次正常 revision
+  3. 進一步回滾到 revision 2
+
+tips: |
+  kubectl rollout history deployment.apps/my-revision-deployment -n revision-namespace
+  kubectl rollout undo deployment.apps/my-revision-deployment -n revision-namespace
+  kubectl rollout undo deployment.apps/my-revision-deployment --to-revision=2 -n revision-namespace
+
+setup:
+  - "kubectl create namespace revision-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create deployment my-revision-deployment --image=nginx:1.18.0 --replicas=2 -n revision-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl set image deployment.apps/my-revision-deployment nginx=nginx:1.19.0 -n revision-namespace"
+  - "kubectl set image deployment.apps/my-revision-deployment nginx=nginx:1.20.0 -n revision-namespace"
+  - "kubectl set image deployment.apps/my-revision-deployment nginx=ngin:1.21.0 -n revision-namespace"
+
+verify:
+  - type: namespace_exists
+    name: revision-namespace
+  - type: deployment_exists
+    name: my-revision-deployment
+    namespace: revision-namespace
+
+cleanup:
+  - "kubectl delete namespace revision-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-05"
+
+tags:
+  - rollout
+  - rollback
+  - deployment
+  - history

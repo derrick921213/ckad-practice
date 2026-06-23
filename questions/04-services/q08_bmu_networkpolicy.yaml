@@ -1,0 +1,43 @@
+id: "04-08"
+domain: Services and Networking
+weight: 15
+difficulty: hard
+title: "[bmuschko] NetworkPolicy：允許 k1/busybox → k2/nginx"
+prompt: |
+  1. 從 setup.yaml 建立物件（namespaces k1, k2）
+  2. 查看 k1 和 k2 中的物件
+  3. 取得 k2/nginx Pod 的 IP，從 k1/busybox wget nginx:80 → 預期失敗
+  4. 建立 NetworkPolicy：
+     - 允許 k1 namespace 的所有 Pod ingress 到 k2/nginx:80
+     - 拒絕其他 namespace 的 ingress
+  5. 重複步驟 3 → 確認連接成功
+
+tips: |
+  kubectl get pod nginx -n k2 -o jsonpath={.status.podIP}
+  kubectl exec -it busybox -n k1 -- wget -O- <nginx-ip>:80
+  # NetworkPolicy 設定 namespaceSelector 選 k1 namespace
+
+setup: []
+
+verify:
+  - type: namespace_exists
+    name: k1
+  - type: namespace_exists
+    name: k2
+  - type: kubectl_output
+    command: ["kubectl", "get", "networkpolicy", "-n", "k2", "-o", "name"]
+    expected_output: "networkpolicy.networking.k8s.io"
+
+cleanup:
+  - "kubectl delete namespace k1 k2 --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/32-networkpolicy/instructions.md
+    section: "Exercise 32"
+
+tags:
+  - networkpolicy
+  - namespace
+  - networking
+  - ingress-policy

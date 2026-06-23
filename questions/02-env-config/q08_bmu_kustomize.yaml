@@ -1,0 +1,43 @@
+id: "02-08"
+domain: Application Environment, Configuration and Security
+weight: 12
+difficulty: hard
+title: "[bmuschko] 使用 Kustomize 從 secret 檔案產生 Secret 並 patch Deployment"
+prompt: |
+  1. 查看 start/ 目錄中的 deployment.yaml 與 basic-auth.txt
+  2. 建立 kustomization.yaml，引用 Deployment 為 resource
+  3. 使用 Kustomize 從 basic-auth.txt 產生 Secret creds（namespace: q71）
+  4. Patch Deployment，讓 Pod template 以 env var 方式消費 Secret 值
+  5. 執行 kubectl kustomize 確認輸出正確
+  6. 在 kustomization.yaml 加入產生 q71 namespace，並套用
+
+tips: |
+  kubectl create namespace q71
+  # kustomization.yaml:
+  #   resources: [deployment.yaml]
+  #   secretGenerator:
+  #   - name: creds
+  #     files: [basic-auth.txt]
+  kubectl kustomize .
+  kubectl apply -k .
+
+setup:
+  - "kubectl create namespace q71 --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: q71
+
+cleanup:
+  - "kubectl delete namespace q71 --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/16-kustomize-secret-patch/instructions.md
+    section: "Exercise 16"
+
+tags:
+  - kustomize
+  - secret
+  - deployment
+  - patch

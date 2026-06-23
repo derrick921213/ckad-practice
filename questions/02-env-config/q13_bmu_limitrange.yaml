@@ -1,0 +1,40 @@
+id: "02-13"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: medium
+title: "[bmuschko] LimitRange：Pod 資源自動套用預設值與限制"
+prompt: |
+  1. 建立 namespace d92 及 LimitRange（使用 setup.yaml）
+  2. 建立 Pod pod-without-resource-requirements：不設定 resources
+     - 觀察：預期套用哪些預設資源？
+  3. 建立 Pod pod-with-more-cpu-resource-requirements：CPU request 400m，limit 1.5
+     - 觀察：預期行為？（超過 LimitRange 上限）
+  4. 建立 Pod pod-with-less-cpu-resource-requirements：CPU request 350m，limit 400m
+     - 觀察：預期行為？（在限制內）
+
+tips: |
+  kubectl apply -f setup.yaml
+  kubectl describe limitrange -n d92
+  kubectl run pod-without-resource-requirements --image=nginx:1.23.4-alpine -n d92
+  kubectl describe pod pod-without-resource-requirements -n d92  # 查看套用的資源
+
+setup:
+  - "kubectl create namespace d92 --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: d92
+
+cleanup:
+  - "kubectl delete namespace d92 --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/25-limitrange/instructions.md
+    section: "Exercise 25"
+
+tags:
+  - limitrange
+  - resources
+  - namespace
+  - defaults

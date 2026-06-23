@@ -1,0 +1,43 @@
+id: "03-08"
+domain: Application Deployment
+weight: 15
+difficulty: hard
+title: "[bmuschko] Blue-Green Deployment 切換"
+prompt: |
+  1. 建立 Deployment nginx-blue，3 replicas，image: nginx:1.23.0，pod label: version=blue
+  2. 建立 ClusterIP Service nginx：port 80，selector: version=blue
+  3. 執行臨時 Pod（alpine/curl:8.5.0）curl Service
+  4. 建立 Deployment nginx-green，3 replicas，image: nginx:1.23.4，pod label: version=green
+  5. 修改 Service selector 為 version=green
+  6. 刪除 nginx-blue Deployment
+  7. 再次執行臨時 Pod curl Service，確認流量已切換
+
+tips: |
+  kubectl create deployment nginx-blue --image=nginx:1.23.0 --replicas=3
+  kubectl expose deployment nginx-blue --name=nginx --port=80 --type=ClusterIP
+  # 修改 service selector: version=green
+  kubectl patch service nginx -p '{"spec":{"selector":{"version":"green"}}}'
+  kubectl run test --image=alpine/curl:8.5.0 --rm -it --restart=Never -- curl nginx
+
+setup: []
+
+verify:
+  - type: deployment_exists
+    name: nginx-green
+  - type: service_exists
+    name: nginx
+
+cleanup:
+  - "kubectl delete deployment nginx-blue nginx-green --ignore-not-found"
+  - "kubectl delete service nginx --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/13-deployment-blue-green/instructions.md
+    section: "Exercise 13"
+
+tags:
+  - blue-green
+  - deployment
+  - service
+  - traffic-switching

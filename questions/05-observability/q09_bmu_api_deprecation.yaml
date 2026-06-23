@@ -1,0 +1,35 @@
+id: "05-09"
+domain: Observability and Maintenance
+weight: 10
+difficulty: medium
+title: "[bmuschko] 確保 YAML manifests 相容 Kubernetes 1.26"
+prompt: |
+  1. 查看 deployment.yaml 與 configmap.yaml（bmuschko exercises/17-api-deprecation/）
+  2. 嘗試 apply，觀察是否出現 deprecated API 警告
+  3. 修改 YAML 使其相容 Kubernetes 1.26+
+  4. 驗證物件可以成功建立
+
+tips: |
+  kubectl apply -f deployment.yaml
+  kubectl apply -f configmap.yaml
+  # 若出現 deprecated 警告，查看 Kubernetes deprecation guide
+  # 更新 apiVersion 為目前支援的版本
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "version", "--short"]
+    expected_output: "Server Version"
+
+cleanup: []
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/17-api-deprecation/instructions.md
+    section: "Exercise 17"
+
+tags:
+  - api-deprecation
+  - compatibility
+  - kubectl

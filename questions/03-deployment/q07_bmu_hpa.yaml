@@ -1,0 +1,45 @@
+id: "03-07"
+domain: Application Deployment
+weight: 12
+difficulty: medium
+title: "[bmuschko] 建立 HorizontalPodAutoscaler"
+prompt: |
+  1. 建立 Deployment nginx，1 replica，image: nginx:1.23.4
+     - CPU request: 0.5
+     - Memory request/limit: 500Mi
+  2. 建立 HPA nginx-hpa：
+     - min: 3，max: 8 replicas
+     - 平均 CPU 使用率 75% 觸發 scale
+     - 平均 Memory 使用率 60% 觸發 scale
+  3. 查看 HPA 狀態及目前資源使用量
+  4. 預期 replica 數是多少？
+
+tips: |
+  kubectl create deployment nginx --image=nginx:1.23.4 --replicas=1
+  # 加入 resources.requests 需用 YAML
+  kubectl autoscale deployment nginx --min=3 --max=8 --cpu-percent=75
+  # Memory-based HPA 需用 YAML（kubectl autoscale 只支援 CPU）
+  kubectl get hpa
+
+setup: []
+
+verify:
+  - type: deployment_exists
+    name: nginx
+  - type: kubectl_output
+    command: ["kubectl", "get", "hpa", "nginx-hpa", "-o", "name"]
+    expected_output: "horizontalpodautoscaler.autoscaling/nginx-hpa"
+
+cleanup:
+  - "kubectl delete hpa nginx-hpa --ignore-not-found"
+  - "kubectl delete deployment nginx --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/12-deployment-horizontal-pod-autoscaler/instructions.md
+    section: "Exercise 12"
+
+tags:
+  - hpa
+  - autoscaling
+  - deployment

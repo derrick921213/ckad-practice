@@ -1,0 +1,55 @@
+id: "01-15"
+domain: Application Design and Build
+weight: 8
+difficulty: easy
+title: "[bmuschko] 管理 Pod Labels 與 Annotations"
+prompt: |
+  1. 建立 3 個 Pod：frontend、backend、database，image: nginx:1.25.5-alpine
+  2. 設定 labels：
+     - frontend: env=prod, team=shiny
+     - backend: env=prod, team=legacy, app=v1.2.4
+     - database: env=prod, team=storage
+  3. 設定 annotations：
+     - frontend: contact=John Doe, commit=2d3mg3
+     - backend: contact=Mary Harris
+  4. 列出所有 Pod 及其 labels
+  5. 用 label selector 查詢 team in (shiny, legacy) 且 env=prod 的 Pod
+  6. 從 backend 移除 env label，重新查詢
+  7. 查詢有 annotations 的 Pod（顯示前後 3 行 YAML）
+
+tips: |
+  kubectl run frontend --image=nginx:1.25.5-alpine --labels="env=prod,team=shiny"
+  kubectl get pods --show-labels
+  kubectl get pods -l env=prod,team in (shiny,legacy)
+  kubectl label pod backend env-
+  kubectl get pods -o yaml | grep -B3 -A3 annotations
+
+setup: []
+
+verify:
+  - type: pod_exists
+    name: frontend
+  - type: pod_exists
+    name: backend
+  - type: pod_exists
+    name: database
+  - type: pod_label
+    name: frontend
+    label: "env=prod"
+  - type: pod_label
+    name: backend
+    label: "team=legacy"
+
+cleanup:
+  - "kubectl delete pod frontend backend database --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/10-labels-annotations-cli/instructions.md
+    section: "Exercise 10"
+
+tags:
+  - labels
+  - annotations
+  - pod
+  - selectors

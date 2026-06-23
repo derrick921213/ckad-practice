@@ -1,0 +1,25 @@
+[project]
+name = "ckad-practice"
+version = "0.1.0"
+description = "CKAD 本地練習評分系統"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    "kubernetes>=29.0.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0.1",
+]
+
+[project.scripts]
+ckad = "src.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.uv]
+package = true

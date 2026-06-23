@@ -1,0 +1,44 @@
+id: "04-01"
+domain: Services and Networking
+weight: 10
+difficulty: easy
+title: "建立 NodePort Service 對外開放應用"
+prompt: |
+  1. 建立 namespace: network-namespace
+  2. 建立 Deployment，名稱 web-deployment，image: nginx，3 replicas，port 80
+  3. 建立 NodePort Service，名稱 web-service
+     - port: 80，targetPort: 80，nodePort: 30080
+  4. 驗證: curl localhost:30080 應回傳 nginx 預設頁面（在 kind 中需透過 hostPort mapping）
+
+tips: |
+  kubectl expose deployment web-deployment --type=NodePort --port=80 --target-port=80 \
+    --name=web-service -n network-namespace
+  # 或直接寫 YAML 指定 nodePort: 30080
+
+setup:
+  - "kubectl create namespace network-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create deployment web-deployment --image=nginx --replicas=3 --port=80 -n network-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: network-namespace
+  - type: service_exists
+    name: web-service
+    namespace: network-namespace
+  - type: service_type
+    name: web-service
+    namespace: network-namespace
+    service_type: NodePort
+  - type: service_port
+    name: web-service
+    namespace: network-namespace
+    port: 80
+    target_port: 80
+
+cleanup:
+  - "kubectl delete namespace network-namespace --force --grace-period=0"
+
+tags:
+  - service
+  - nodeport
+  - networking

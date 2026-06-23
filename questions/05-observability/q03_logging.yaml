@@ -1,0 +1,36 @@
+id: "05-03"
+domain: Observability and Maintenance
+weight: 8
+difficulty: easy
+title: "取得 Pod 最近 1 小時的 logs"
+prompt: |
+  1. 建立 namespace: log-namespace
+  2. 建立 Pod log-pod，image: nginx
+  3. 取得 log-pod 最近 1 小時的 logs
+
+tips: |
+  kubectl create namespace log-namespace
+  kubectl run log-pod --image=nginx -n log-namespace
+  kubectl logs --since=1h log-pod -n log-namespace
+
+setup:
+  - "kubectl create namespace log-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl run log-pod --image=nginx -n log-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: pod_running
+    name: log-pod
+    namespace: log-namespace
+
+cleanup:
+  - "kubectl delete namespace log-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 05-ckad-observability-maintenance.md
+    section: "05-02"
+
+tags:
+  - logs
+  - observability
+  - debugging

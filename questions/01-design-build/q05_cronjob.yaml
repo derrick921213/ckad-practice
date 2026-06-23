@@ -1,0 +1,38 @@
+id: "01-05"
+domain: Application Design and Build
+weight: 10
+difficulty: medium
+title: "建立 CronJob 定期執行任務"
+prompt: |
+  1. 建立 namespace: cron-namespace
+  2. 建立 CronJob，名稱 my-cronjob
+     - schedule: "*/1 * * * *"（每分鐘）
+     - image: busybox
+     - command: ["sh", "-c", "date && echo CronJob executed"]
+     - successfulJobsHistoryLimit: 3
+     - failedJobsHistoryLimit: 1
+
+tips: |
+  kubectl create cronjob my-cronjob --image=busybox --schedule="*/1 * * * *" -n cron-namespace \
+    -- sh -c "date && echo CronJob executed"
+
+setup:
+  - "kubectl create namespace cron-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: cron-namespace
+  - type: cronjob_exists
+    name: my-cronjob
+    namespace: cron-namespace
+  - type: kubectl_output
+    command: ["kubectl", "get", "cronjob", "my-cronjob", "-n", "cron-namespace", "-o", "jsonpath={.spec.schedule}"]
+    expected_output: "*/1 * * * *"
+
+cleanup:
+  - "kubectl delete namespace cron-namespace --force --grace-period=0"
+
+tags:
+  - cronjob
+  - schedule
+  - batch

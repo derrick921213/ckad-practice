@@ -1,0 +1,60 @@
+id: "03-05"
+domain: Application Deployment
+weight: 15
+difficulty: hard
+title: "Blue-Green Deployment：流量分流 70/30"
+prompt: |
+  1. 建立 namespace: blue-green-namespace
+  2. 建立 Deployment blue-deployment，10 replicas，image: nginx
+     - label pods: app=blue-deployment, tier=web
+  3. 建立 Service bg-service，selector: tier=web（指向兩個 deployment）
+  4. 建立 Deployment green-deployment，10 replicas，image: nginx
+     - label pods: app=green-deployment, tier=web
+  5. 調整流量 blue=70%, green=30%：
+     - kubectl scale --replicas=7 deployment blue-deployment
+     - kubectl scale --replicas=3 deployment green-deployment
+
+tips: |
+  # Service selector 用 tier=web 而非 app label，這樣可同時選到兩個 deployment
+  kubectl expose deployment blue-deployment --port=80 --target-port=80 --name=bg-service --dry-run=client -o yaml > svc.yaml
+  # 改 selector 為 tier: web
+  kubectl scale --replicas=7 deployment blue-deployment -n blue-green-namespace
+  kubectl scale --replicas=3 deployment green-deployment -n blue-green-namespace
+
+setup:
+  - "kubectl create namespace blue-green-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: blue-green-namespace
+  - type: deployment_exists
+    name: blue-deployment
+    namespace: blue-green-namespace
+  - type: deployment_exists
+    name: green-deployment
+    namespace: blue-green-namespace
+  - type: deployment_replicas
+    name: blue-deployment
+    namespace: blue-green-namespace
+    replicas: 7
+  - type: deployment_replicas
+    name: green-deployment
+    namespace: blue-green-namespace
+    replicas: 3
+  - type: service_exists
+    name: bg-service
+    namespace: blue-green-namespace
+
+cleanup:
+  - "kubectl delete namespace blue-green-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 03-ckad-deployment.md
+    section: "03-05"
+
+tags:
+  - blue-green
+  - canary
+  - deployment
+  - service

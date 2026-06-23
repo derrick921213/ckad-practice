@@ -1,0 +1,41 @@
+id: "06-04"
+domain: Miscellaneous
+weight: 8
+difficulty: medium
+title: "使用 Strategic Merge Patch 更新 Deployment revisionHistoryLimit"
+prompt: |
+  前提：revision-namespace 中已有 my-revision-deployment
+
+  1. 查看目前的 revisionHistoryLimit 值
+  2. 建立 patch YAML 檔案
+  3. 使用 kubectl patch 將 revisionHistoryLimit 設為 20
+  4. 驗證更改成功
+
+tips: |
+  kubectl get deployment my-revision-deployment -n revision-namespace -o jsonpath={.spec.revisionHistoryLimit}
+  # patch-file.yaml:
+  # spec:
+  #   revisionHistoryLimit: 20
+  kubectl patch deployment my-revision-deployment --patch "$(cat patch-file.yaml)" -n revision-namespace
+
+setup:
+  - "kubectl create namespace revision-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create deployment my-revision-deployment --image=nginx --replicas=2 -n revision-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "get", "deployment", "my-revision-deployment", "-n", "revision-namespace", "-o", "jsonpath={.spec.revisionHistoryLimit}"]
+    expected_output: "20"
+
+cleanup:
+  - "kubectl delete namespace revision-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 06-ckad-miscellaneous.md
+    section: "06-04"
+
+tags:
+  - patch
+  - deployment
+  - kubectl

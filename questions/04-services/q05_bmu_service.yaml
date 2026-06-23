@@ -1,0 +1,46 @@
+id: "04-05"
+domain: Services and Networking
+weight: 12
+difficulty: medium
+title: "[bmuschko] ClusterIP 與 NodePort Service 比較"
+prompt: |
+  1. 建立 ClusterIP Service myapp：port 80，target-port 80
+  2. 建立 Deployment myapp，1 replica，image: nginx:1.23.4-alpine，expose port 80
+  3. Scale Deployment 到 2 replicas
+  4. 執行臨時 busybox Pod，wget Service IP
+  5. 將 Service 改為 NodePort 類型
+  6. 從 cluster 外部 wget Service
+  7. (選做) 討論：不需要 Deployment 能否直接暴露 Pod？
+
+tips: |
+  kubectl create service clusterip myapp --tcp=80:80
+  kubectl create deployment myapp --image=nginx:1.23.4-alpine --port=80
+  kubectl scale deployment myapp --replicas=2
+  kubectl run tmp --image=busybox --rm -it --restart=Never -- wget -O- myapp:80
+  kubectl patch service myapp -p '{"spec":{"type":"NodePort"}}'
+
+setup: []
+
+verify:
+  - type: service_exists
+    name: myapp
+  - type: deployment_exists
+    name: myapp
+  - type: deployment_replicas
+    name: myapp
+    replicas: 2
+
+cleanup:
+  - "kubectl delete deployment myapp --ignore-not-found"
+  - "kubectl delete service myapp --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/29-service/instructions.md
+    section: "Exercise 29"
+
+tags:
+  - service
+  - clusterip
+  - nodeport
+  - deployment

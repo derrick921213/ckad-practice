@@ -1,0 +1,31 @@
+id: "06-01"
+domain: Miscellaneous
+weight: 5
+difficulty: easy
+title: "找出目前 active namespace"
+prompt: |
+  1. 列出所有 namespaces
+  2. 找出目前 context 中 active 的 namespace
+
+tips: |
+  kubectl get namespace
+  kubectl config get-contexts
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "config", "get-contexts"]
+    expected_output: "*"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 06-ckad-miscellaneous.md
+    section: "06-01"
+
+tags:
+  - namespace
+  - context
+  - kubectl

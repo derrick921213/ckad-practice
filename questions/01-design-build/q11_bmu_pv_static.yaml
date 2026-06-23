@@ -1,0 +1,52 @@
+id: "01-11"
+domain: Application Design and Build
+weight: 12
+difficulty: medium
+title: "[bmuschko] 建立 PV/PVC 並掛載到 Pod（static provisioning）"
+prompt: |
+  1. 建立 PersistentVolume pv：
+     - accessMode: ReadWriteMany
+     - storage: 512Mi
+     - hostPath: /data/config
+  2. 建立 PersistentVolumeClaim pvc：
+     - storage request: 256Mi
+     - storageClassName: ""（空字串）
+     - 確認 PVC 已 Bound
+  3. 建立 Pod app，image: nginx:1.21.6
+     - 掛載 PVC 到 /var/app/config
+  4. exec 進入 Pod，在 /var/app/config 建立一個檔案
+
+tips: |
+  # PV accessMode: ReadWriteMany
+  # PVC storageClassName: "" 讓 Kubernetes 自動選擇 PV
+  kubectl get pvc  # 確認 STATUS=Bound
+  kubectl exec -it app -- sh
+  touch /var/app/config/test.txt
+
+setup: []
+
+verify:
+  - type: pv_exists
+    name: pv
+  - type: pvc_exists
+    name: pvc
+  - type: pvc_bound
+    name: pvc
+  - type: pod_running
+    name: app
+
+cleanup:
+  - "kubectl delete pod app --ignore-not-found --force --grace-period=0"
+  - "kubectl delete pvc pvc --ignore-not-found"
+  - "kubectl delete pv pv --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/06-persistentvolume-static-provisioning/instructions.md
+    section: "Exercise 6"
+
+tags:
+  - pv
+  - pvc
+  - storage
+  - static-provisioning

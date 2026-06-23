@@ -1,0 +1,40 @@
+id: "02-14"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: medium
+title: "[bmuschko] 建立 ConfigMap 並以 Volume 掛載到 Pod"
+prompt: |
+  1. 查看 application.yaml 設定檔
+  2. 從 application.yaml 建立 ConfigMap app-config
+  3. 建立 Pod backend，image: nginx:1.23.4-alpine
+     - 以 Volume 方式掛載 ConfigMap 到 /etc/config
+  4. exec 進入 Pod，查看 /etc/config 目錄中的檔案
+  5. (選做) 討論：ConfigMap 的 hot reload 如何實現？
+
+tips: |
+  kubectl create configmap app-config --from-file=application.yaml
+  # Pod volumeMounts + volumes 使用 configMap
+  kubectl exec -it backend -- sh
+  ls /etc/config
+
+setup: []
+
+verify:
+  - type: configmap_exists
+    name: app-config
+  - type: pod_running
+    name: backend
+
+cleanup:
+  - "kubectl delete pod backend --ignore-not-found --force --grace-period=0"
+  - "kubectl delete configmap app-config --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/26-configmap/instructions.md
+    section: "Exercise 26"
+
+tags:
+  - configmap
+  - volume
+  - pod

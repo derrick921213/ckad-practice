@@ -1,0 +1,47 @@
+id: "03-03"
+domain: Application Deployment
+weight: 10
+difficulty: medium
+title: "Rolling Update：更換 Deployment Image"
+prompt: |
+  1. 建立 namespace: edit-namespace
+  2. 建立 Deployment: edit-deployment，2 replicas，image: redis
+  3. 使用 kubectl set image 將 container image 改為 nginx
+  4. 再將 image 改為 nginx:1.14.2
+
+tips: |
+  kubectl create deployment edit-deployment --image=redis --replicas=2 -n edit-namespace
+  kubectl set image deployment.apps/edit-deployment redis=nginx -n edit-namespace
+  kubectl set image deployment.apps/edit-deployment redis=nginx:1.14.2 -n edit-namespace
+  # 注意：container name 是 'redis'（由 image 名稱決定）
+
+setup:
+  - "kubectl create namespace edit-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: edit-namespace
+  - type: deployment_exists
+    name: edit-deployment
+    namespace: edit-namespace
+  - type: deployment_image
+    name: edit-deployment
+    namespace: edit-namespace
+    image: "nginx:1.14.2"
+  - type: deployment_replicas
+    name: edit-deployment
+    namespace: edit-namespace
+    replicas: 2
+
+cleanup:
+  - "kubectl delete namespace edit-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 03-ckad-deployment.md
+    section: "03-03"
+
+tags:
+  - deployment
+  - rolling-update
+  - set-image

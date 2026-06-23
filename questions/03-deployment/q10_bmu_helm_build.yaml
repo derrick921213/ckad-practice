@@ -1,0 +1,46 @@
+id: "03-10"
+domain: Application Deployment
+weight: 15
+difficulty: hard
+title: "[bmuschko] 實作並打包自定義 Helm Chart"
+prompt: |
+  1. 建立 Chart.yaml，包含：API version: 1.0.0，Name: web-app，Version: 2.5.4
+  2. 建立 values.yaml：service_port: 80，container_port: 3000
+  3. 建立 template web-app-pod-template.yaml：
+     - Pod hello-world，image: bmuschko/nodejs-hello-world:1.0.0
+     - containerPort 使用 container_port 佔位符
+  4. 建立 template web-app-service-template.yaml：
+     - Service web-app-service，type: ClusterIP
+     - port/targetPort 使用 values 佔位符
+  5. 打包 chart（helm package）
+  6. 安裝 chart，名稱 hello-world，namespace app-stack，覆寫 service_port=9090
+  7. 找出 chart 安裝的物件
+  8. 刪除 Helm chart
+
+tips: |
+  helm package .
+  kubectl create namespace app-stack
+  helm install hello-world ./web-app-2.5.4.tgz -n app-stack --set service_port=9090
+  helm ls -n app-stack
+  helm uninstall hello-world -n app-stack
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["helm", "ls", "-n", "app-stack", "-q"]
+    expected_output: "hello-world"
+
+cleanup:
+  - "helm uninstall hello-world -n app-stack --ignore-not-found"
+  - "kubectl delete namespace app-stack --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/15-helm-build-chart/instructions.md
+    section: "Exercise 15"
+
+tags:
+  - helm
+  - chart
+  - packaging

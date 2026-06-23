@@ -1,0 +1,45 @@
+id: "02-04"
+domain: Application Environment, Configuration and Security
+weight: 12
+difficulty: medium
+title: "建立 ResourceQuota 與 LimitRange"
+prompt: |
+  1. 建立 namespace: quota-namespace
+  2. 建立 ResourceQuota，名稱 my-quota，設定：
+     - hard memory: 2Gi
+     - hard CPU: 500m
+  3. 建立 LimitRange，名稱 my-limit，限制 Pod 最大：
+     - memory: 1Gi
+     - CPU: 250m
+
+tips: |
+  kubectl create namespace quota-namespace
+  kubectl create quota my-quota --hard=cpu=500m,memory=2G -n quota-namespace
+  # LimitRange 需用 YAML 建立（無 imperative 指令）
+  # apiVersion: v1 / kind: LimitRange
+
+setup:
+  - "kubectl create namespace quota-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: quota-namespace
+  - type: kubectl_output
+    command: ["kubectl", "get", "quota", "my-quota", "-n", "quota-namespace", "-o", "name"]
+    expected_output: "resourcequota/my-quota"
+  - type: kubectl_output
+    command: ["kubectl", "get", "limitrange", "my-limit", "-n", "quota-namespace", "-o", "name"]
+    expected_output: "limitrange/my-limit"
+
+cleanup:
+  - "kubectl delete namespace quota-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 02-ckad-env-configuration-security.md
+    section: "02-02"
+
+tags:
+  - resourcequota
+  - limitrange
+  - resources

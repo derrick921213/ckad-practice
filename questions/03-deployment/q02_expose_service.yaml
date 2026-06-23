@@ -1,0 +1,44 @@
+id: "03-02"
+domain: Application Deployment
+weight: 10
+difficulty: easy
+title: "Expose Deployment 為 ClusterIP Service"
+prompt: |
+  承接 03-01（確保 my-deployment 已建立於 deployment-namespace）
+  將 my-deployment 對 cluster 內部開放，port 8080 → target port 80
+  Service 類型應為 ClusterIP（預設）
+
+tips: |
+  kubectl expose deployment my-deployment --port=8080 --target-port=80 -n deployment-namespace
+  # 驗證: kubectl get service -n deployment-namespace
+
+setup:
+  - "kubectl create namespace deployment-namespace --dry-run=client -o yaml | kubectl apply -f -"
+  - "kubectl create deployment my-deployment --image=nginx --replicas=3 --port=80 -n deployment-namespace --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: service_exists
+    name: my-deployment
+    namespace: deployment-namespace
+  - type: service_type
+    name: my-deployment
+    namespace: deployment-namespace
+    service_type: ClusterIP
+  - type: service_port
+    name: my-deployment
+    namespace: deployment-namespace
+    port: 8080
+    target_port: 80
+
+cleanup:
+  - "kubectl delete namespace deployment-namespace --force --grace-period=0"
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 03-ckad-deployment.md
+    section: "03-02"
+
+tags:
+  - service
+  - clusterip
+  - expose

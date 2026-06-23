@@ -1,0 +1,33 @@
+id: "02-03"
+domain: Application Environment, Configuration and Security
+weight: 8
+difficulty: easy
+title: "列出 CRD 並查詢 Calico Network Policy 資源名稱"
+prompt: |
+  1. 列出 cluster 中所有安裝的 Custom Resource Definitions (CRDs)
+  2. 找出 Calico Network Policy 的正確 resource name（非 Kubernetes 預設的 NetworkPolicy）
+  3. 執行指令列出所有 Calico Network Policies
+
+tips: |
+  kubectl get crds
+  kubectl api-resources -o name | grep calico
+  kubectl get networkpolicies.crd.projectcalico.org
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "get", "crds"]
+    expected_output: "projectcalico.org"
+
+cleanup: []
+
+sources:
+  - repo: jamesbuckett/ckad-questions
+    file: 02-ckad-env-configuration-security.md
+    section: "02-01"
+
+tags:
+  - crd
+  - calico
+  - api-resources

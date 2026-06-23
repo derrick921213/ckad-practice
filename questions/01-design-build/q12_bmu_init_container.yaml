@@ -1,0 +1,41 @@
+id: "01-12"
+domain: Application Design and Build
+weight: 12
+difficulty: medium
+title: "[bmuschko] 建立含 init container 的 Pod（下載設定檔）"
+prompt: |
+  1. 建立 Pod business-app，定義兩個 containers：
+     - init container configurer：image busybox:1.36.1，執行 wget 下載設定檔到 /usr/shared/app
+     - main container web：image bmuschko/nodejs-read-config:1.0.0，expose port 8080
+  2. 加入 emptyDir volume，掛載到兩個 container 的 /usr/shared/app
+  3. init container 下載：
+     https://raw.githubusercontent.com/bmuschko/ckad-crash-course/master/exercises/07-init-container/app/config/config.json
+  4. 啟動 Pod，確認正常運行
+  5. exec 進入 web container 執行：curl localhost:8080
+
+tips: |
+  # initContainers 在 spec 中定義
+  # emptyDir volume 讓 init 和 main container 共享檔案
+  kubectl logs business-app -c configurer  # 查看 init container logs
+  kubectl exec business-app -c web -- curl localhost:8080
+
+setup: []
+
+verify:
+  - type: pod_exists
+    name: business-app
+  - type: pod_running
+    name: business-app
+
+cleanup:
+  - "kubectl delete pod business-app --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/07-init-container/instructions.md
+    section: "Exercise 7"
+
+tags:
+  - init-container
+  - emptydir
+  - multi-container

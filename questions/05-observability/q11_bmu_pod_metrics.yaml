@@ -1,0 +1,34 @@
+id: "05-11"
+domain: Observability and Maintenance
+weight: 8
+difficulty: easy
+title: "[bmuschko] 找出消耗最多 Memory 的 Pod"
+prompt: |
+  1. 建立 namespace: stress-test
+  2. 建立 3 個 stress Pod（使用已提供的 YAML manifest）
+  3. 使用 metrics server 找出消耗最多 memory 的 Pod
+
+tips: |
+  kubectl create namespace stress-test
+  kubectl top pods -n stress-test --sort-by=memory
+
+setup:
+  - "kubectl create namespace stress-test --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: stress-test
+
+cleanup:
+  - "kubectl delete namespace stress-test --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/19-pod-metrics/instructions.md
+    section: "Exercise 19"
+
+tags:
+  - metrics
+  - memory
+  - top
+  - observability

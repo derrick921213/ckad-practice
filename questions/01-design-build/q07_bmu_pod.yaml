@@ -1,0 +1,49 @@
+id: "01-07"
+domain: Application Design and Build
+weight: 10
+difficulty: medium
+title: "[bmuschko] 建立並操作 Pod：troubleshoot image 問題"
+prompt: |
+  1. 建立 namespace: ckad-prep
+  2. 在 ckad-prep 建立 Pod mypod，image: nginx:2.3.5，expose port 80
+  3. 觀察 Pod 狀態，找出問題並記錄到 pod-error.txt
+  4. 將 image 改為 nginx:1.15.12
+  5. 驗證 container 正在運行
+  6. exec 進入 container 執行 ls，記錄輸出
+  7. 取得 mypod 的 IP 位址
+  8. 執行臨時 busybox Pod，wget 連接 nginx Pod port 80
+  9. 查看 mypod logs
+  10. 刪除 Pod 和 namespace
+
+tips: |
+  kubectl create namespace ckad-prep
+  kubectl run mypod --image=nginx:2.3.5 --port=80 -n ckad-prep
+  kubectl get pod mypod -n ckad-prep  # 觀察 ImagePullBackOff
+  kubectl set image pod/mypod mypod=nginx:1.15.12 -n ckad-prep
+  kubectl exec -it mypod -n ckad-prep -- ls
+  kubectl get pod mypod -n ckad-prep -o jsonpath={.status.podIP}
+  kubectl run tmp --image=busybox --rm -it --restart=Never -n ckad-prep -- wget -O- <POD_IP>:80
+
+setup:
+  - "kubectl create namespace ckad-prep --dry-run=client -o yaml | kubectl apply -f -"
+
+verify:
+  - type: namespace_exists
+    name: ckad-prep
+  - type: pod_exists
+    name: mypod
+    namespace: ckad-prep
+
+cleanup:
+  - "kubectl delete namespace ckad-prep --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/02-pod/instructions.md
+    section: "Exercise 2"
+
+tags:
+  - pod
+  - troubleshooting
+  - image
+  - exec

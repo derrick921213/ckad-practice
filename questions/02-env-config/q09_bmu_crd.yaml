@@ -1,0 +1,47 @@
+id: "02-09"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: medium
+title: "[bmuschko] 建立 CRD 與 Custom Object"
+prompt: |
+  1. 建立 CRD backup.example.com，規格：
+     - Group: example.com
+     - Version: v1
+     - Kind: Backup
+     - Singular: backup / Plural: backups
+     - Properties（string）：cronExpression, podName, path
+  2. 查看 Backup custom resource 詳情
+  3. 建立 Custom Object nginx-backup：
+     - cronExpression: "0 0 * * *"
+     - podName: nginx
+     - path: /usr/local/nginx
+  4. 查看 nginx-backup 物件詳情
+
+tips: |
+  # 建立 CRD 需 YAML（CustomResourceDefinition）
+  kubectl get crd backup.example.com
+  kubectl describe crd backup.example.com
+  kubectl apply -f nginx-backup.yaml
+  kubectl get backup nginx-backup
+  kubectl describe backup nginx-backup
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["kubectl", "get", "crd", "backups.example.com", "-o", "name"]
+    expected_output: "customresourcedefinition.apiextensions.k8s.io/backups.example.com"
+
+cleanup:
+  - "kubectl delete backup nginx-backup --ignore-not-found"
+  - "kubectl delete crd backups.example.com --ignore-not-found"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/21-crd/instructions.md
+    section: "Exercise 21"
+
+tags:
+  - crd
+  - custom-resource
+  - kubernetes-extension

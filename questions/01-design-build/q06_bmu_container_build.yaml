@@ -1,0 +1,39 @@
+id: "01-06"
+domain: Application Design and Build
+weight: 10
+difficulty: easy
+title: "[bmuschko] 從 Dockerfile 建立並執行 Container"
+prompt: |
+  1. 查看 app/ 目錄中的 Dockerfile
+  2. 建立 container image，tag: nodejs-hello-world:1.0.0
+  3. 執行 container，對外暴露 port 80
+  4. 對 app endpoint 執行 curl/wget
+  5. 取得 container logs
+  6. 將 image 儲存為 nodejs-hello-world-1.0.0.tar
+
+tips: |
+  docker build -t nodejs-hello-world:1.0.0 .
+  docker run -d -p 80:3000 nodejs-hello-world:1.0.0
+  curl localhost:80
+  docker logs <container-id>
+  docker save nodejs-hello-world:1.0.0 -o nodejs-hello-world-1.0.0.tar
+
+setup: []
+
+verify:
+  - type: kubectl_output
+    command: ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"]
+    expected_output: "nodejs-hello-world:1.0.0"
+
+cleanup: []
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/01-container/instructions.md
+    section: "Exercise 1"
+
+tags:
+  - docker
+  - container
+  - image
+  - nodejs

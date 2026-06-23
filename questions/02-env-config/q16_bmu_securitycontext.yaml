@@ -1,0 +1,44 @@
+id: "02-16"
+domain: Application Environment, Configuration and Security
+weight: 10
+difficulty: medium
+title: "[bmuschko] 設定 Pod SecurityContext（UID/GID/fsGroup）"
+prompt: |
+  1. 建立 Pod busybox-security-context，image: busybox:1.28
+     - 指令：sh -c sleep 1h
+  2. 加入 emptyDir volume，掛載到 /data/test
+  3. 設定 securityContext：
+     - runAsUser: 1000
+     - runAsGroup: 3000
+     - fsGroup: 2000
+     - allowPrivilegeEscalation: false
+  4. 建立 Pod，確認 Running
+  5. exec 進入 container，在 /data/test 建立 logs.txt
+     - 查看 logs.txt 的 user ID 與 group ID 是什麼？
+
+tips: |
+  # Pod spec.securityContext 設定 runAsUser/runAsGroup/fsGroup
+  # container securityContext 設定 allowPrivilegeEscalation
+  kubectl exec -it busybox-security-context -- sh
+  id  # 確認 uid gid
+  ls -la /data/test/
+
+setup: []
+
+verify:
+  - type: pod_running
+    name: busybox-security-context
+
+cleanup:
+  - "kubectl delete pod busybox-security-context --ignore-not-found --force --grace-period=0"
+
+sources:
+  - repo: bmuschko/ckad-crash-course
+    file: exercises/28-securitycontext/instructions.md
+    section: "Exercise 28"
+
+tags:
+  - securitycontext
+  - uid
+  - gid
+  - privilege-escalation
