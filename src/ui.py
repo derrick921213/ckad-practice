@@ -3,11 +3,13 @@ Rich TUI 介面：顯示題目、計時、結果。
 """
 
 from __future__ import annotations
+import sys
 import time
 import threading
 from typing import Optional
 
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -188,6 +190,31 @@ def confirm_verify() -> bool:
 
 def wait_for_enter(msg: str = "按 Enter 繼續...") -> None:
     console.input(f"[dim]{msg}[/dim]")
+
+
+def wait_with_live_timer(prompt: str = "在叢集完成操作後，按 Enter 進行驗證...") -> float:
+    """顯示即時計時器並等待 Enter，回傳已用秒數。"""
+    start = time.time()
+    entered = threading.Event()
+
+    def _read_enter() -> None:
+        sys.stdin.readline()
+        entered.set()
+
+    t = threading.Thread(target=_read_enter, daemon=True)
+    t.start()
+
+    console.print(f"[dim]{prompt}[/dim]")
+
+    with Live("", refresh_per_second=2, console=console, transient=True) as live:
+        while not entered.is_set():
+            elapsed = time.time() - start
+            mins = int(elapsed // 60)
+            secs = int(elapsed % 60)
+            live.update(f"  [bold yellow]⏱  {mins:02d}:{secs:02d}[/bold yellow]")
+            time.sleep(0.5)
+
+    return time.time() - start
 
 
 def show_spinner(msg: str) -> Progress:

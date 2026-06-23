@@ -80,17 +80,14 @@ def practice(
                 env.apply_setup_commands(question.setup)
 
         # 顯示題目
-        start_time = time.time()
         ui.show_question(question, i, len(questions), elapsed=0)
 
         if skip_verify:
             ui.wait_for_enter()
             continue
 
-        # 等待使用者完成
-        console.print("[dim]在叢集完成操作後，按 Enter 進行驗證...[/dim]")
-        console.input()
-        elapsed = time.time() - start_time
+        # 等待使用者完成（即時計時器）
+        elapsed = ui.wait_with_live_timer()
 
         # 驗證
         with ui.show_spinner("驗證答案中...") as progress:
