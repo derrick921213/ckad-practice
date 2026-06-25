@@ -33,7 +33,7 @@ def _check_namespace_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Namespace '{c.name}' 不存在"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_pod_exists(c: VerifyCheck) -> CheckResult:
@@ -45,7 +45,7 @@ def _check_pod_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Pod '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_pod_running(c: VerifyCheck) -> CheckResult:
@@ -58,7 +58,9 @@ def _check_pod_running(c: VerifyCheck) -> CheckResult:
             return True, f"Pod '{c.name}' Running"
         return False, f"Pod '{c.name}' 狀態為 {phase}（預期 Running）"
     except ApiException as e:
-        return False, str(e)
+        if e.status == 404:
+            return False, f"Pod '{c.name}' 不存在於 {ns}"
+        return False, f"API 錯誤 {e.status}"
 
 
 def _check_pod_image(c: VerifyCheck) -> CheckResult:
@@ -71,7 +73,9 @@ def _check_pod_image(c: VerifyCheck) -> CheckResult:
             return True, f"Pod '{c.name}' 使用 image '{c.image}'"
         return False, f"Pod '{c.name}' image 為 {images}，預期包含 '{c.image}'"
     except ApiException as e:
-        return False, str(e)
+        if e.status == 404:
+            return False, f"Pod '{c.name}' 不存在於 {ns}"
+        return False, f"API 錯誤 {e.status}"
 
 
 def _check_pod_label(c: VerifyCheck) -> CheckResult:
@@ -87,7 +91,9 @@ def _check_pod_label(c: VerifyCheck) -> CheckResult:
             return False, f"Pod '{c.name}' labels={labels}，預期有 {c.label}"
         return False, "label 格式應為 key=value"
     except ApiException as e:
-        return False, str(e)
+        if e.status == 404:
+            return False, f"Pod '{c.name}' 不存在於 {ns}"
+        return False, f"API 錯誤 {e.status}"
 
 
 def _check_deployment_exists(c: VerifyCheck) -> CheckResult:
@@ -99,7 +105,7 @@ def _check_deployment_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Deployment '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_deployment_replicas(c: VerifyCheck) -> CheckResult:
@@ -112,7 +118,7 @@ def _check_deployment_replicas(c: VerifyCheck) -> CheckResult:
             return True, f"Deployment '{c.name}' replicas={actual} ✓"
         return False, f"Deployment '{c.name}' replicas={actual}，預期={c.replicas}"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_deployment_image(c: VerifyCheck) -> CheckResult:
@@ -125,7 +131,7 @@ def _check_deployment_image(c: VerifyCheck) -> CheckResult:
             return True, f"Deployment '{c.name}' image 包含 '{c.image}'"
         return False, f"Deployment '{c.name}' images={images}，預期包含 '{c.image}'"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_service_exists(c: VerifyCheck) -> CheckResult:
@@ -137,7 +143,7 @@ def _check_service_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Service '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_service_type(c: VerifyCheck) -> CheckResult:
@@ -150,7 +156,7 @@ def _check_service_type(c: VerifyCheck) -> CheckResult:
             return True, f"Service '{c.name}' type={actual} ✓"
         return False, f"Service '{c.name}' type={actual}，預期={c.service_type}"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_service_port(c: VerifyCheck) -> CheckResult:
@@ -167,7 +173,7 @@ def _check_service_port(c: VerifyCheck) -> CheckResult:
             return True, f"Service '{c.name}' port 設定正確 {ports}"
         return False, f"Service '{c.name}' ports={ports}，預期 port={c.port} targetPort={c.target_port}"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_configmap_exists(c: VerifyCheck) -> CheckResult:
@@ -179,7 +185,7 @@ def _check_configmap_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"ConfigMap '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_configmap_key(c: VerifyCheck) -> CheckResult:
@@ -194,7 +200,7 @@ def _check_configmap_key(c: VerifyCheck) -> CheckResult:
             return False, f"ConfigMap '{c.name}[{c.key}]'={data[c.key]}，預期={c.value}"
         return True, f"ConfigMap '{c.name}[{c.key}]' ✓"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_secret_exists(c: VerifyCheck) -> CheckResult:
@@ -206,7 +212,7 @@ def _check_secret_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Secret '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_pv_exists(c: VerifyCheck) -> CheckResult:
@@ -217,7 +223,7 @@ def _check_pv_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"PersistentVolume '{c.name}' 不存在"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_pvc_exists(c: VerifyCheck) -> CheckResult:
@@ -229,7 +235,7 @@ def _check_pvc_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"PVC '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_pvc_bound(c: VerifyCheck) -> CheckResult:
@@ -242,7 +248,7 @@ def _check_pvc_bound(c: VerifyCheck) -> CheckResult:
             return True, f"PVC '{c.name}' 已 Bound ✓"
         return False, f"PVC '{c.name}' 狀態={phase}（預期 Bound）"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_container_resources(c: VerifyCheck) -> CheckResult:
@@ -275,7 +281,7 @@ def _check_container_resources(c: VerifyCheck) -> CheckResult:
                 return False, f"Container resources 不符: {'; '.join(msgs)}"
         return True, f"Container resources 設定正確 ✓"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_job_exists(c: VerifyCheck) -> CheckResult:
@@ -287,7 +293,7 @@ def _check_job_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Job '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_job_completed(c: VerifyCheck) -> CheckResult:
@@ -301,7 +307,7 @@ def _check_job_completed(c: VerifyCheck) -> CheckResult:
                 return True, f"Job '{c.name}' 已完成 ✓"
         return False, f"Job '{c.name}' 尚未完成"
     except ApiException as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_cronjob_exists(c: VerifyCheck) -> CheckResult:
@@ -313,7 +319,7 @@ def _check_cronjob_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"CronJob '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_ingress_exists(c: VerifyCheck) -> CheckResult:
@@ -325,7 +331,7 @@ def _check_ingress_exists(c: VerifyCheck) -> CheckResult:
     except ApiException as e:
         if e.status == 404:
             return False, f"Ingress '{c.name}' 不存在於 {ns}"
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 def _check_kubectl_output(c: VerifyCheck) -> CheckResult:
@@ -341,7 +347,7 @@ def _check_kubectl_output(c: VerifyCheck) -> CheckResult:
             return True, "指令執行成功 ✓"
         return False, f"輸出:\n{output.strip()[:300]}"
     except Exception as e:
-        return False, str(e)
+        return False, f"API 錯誤 {e.status}: {e.reason}"
 
 
 # ─── dispatch 表 ────────────────────────────────────────────────
